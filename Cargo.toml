@@ -1,0 +1,30 @@
+[package]
+name = "cookie-classifier"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.42", features = ["full"] }
+openssl = { version = "0.10.35", features = ["vendored"] }
+futures = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+jsonwebtoken = "9.3"
+axum-extra = { version = "0.9", features = ["typed-header"] }
+anyhow = "1.0"
+lazy_static = "1.5.0"
+mongodb = { version = "3.1", features = ["snappy-compression"] }
+axum = { version = "0.7.9"}
+tower-http = { version = "0.6.2", features = ["cors", "limit"] }
+axum-limit = "0.1.0-alpha.2"
+redis = { version = "0.28.2", features = ["tokio-comp"] }
+tower = { version = "0.5.2", features = ["full"] }
+pin-project = "1.1.8"
+
+[profile.dev]
+opt-level = 1  
+
+[profile.release]
+opt-level = 3  
+lto = true     
+codegen-units = 1 
