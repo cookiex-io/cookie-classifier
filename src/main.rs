@@ -4,7 +4,7 @@ use axum::routing::get;
 use axum::{BoxError, Json, Router};
 use axum::{error_handling::HandleErrorLayer, Extension,http::StatusCode};
 use dto::{classify_open_routes, classify_routes};
-use infrastructure::cache::REDIS_URI;
+use infrastructure::cache::{REDIS_HOST_NAME, REDIS_PRIMARY_PASSWORD};
 use mongodb::Client;
 use serde_json::{json, Value};
 use service::layer::RateLimitLayer;
@@ -37,7 +37,7 @@ async fn main() -> Result<(), Error> {
         Ok(client) => client,
         Err(e) => panic!("Failed to initialize database client: {}", e),
     };
-    let redis = redis::Client::open(REDIS_URI.as_str()).unwrap();
+    let redis = redis::Client::open(format!("redis://:{}@{}",REDIS_PRIMARY_PASSWORD.as_str(),REDIS_HOST_NAME.as_str())).unwrap();
     let redis_connection = redis.get_multiplexed_async_connection().await.unwrap();
     let make_service = |key: &str, rate: u32, window: Duration| {
         let ratelimit = RateLimitLayer::new(

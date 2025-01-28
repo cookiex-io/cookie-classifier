@@ -3,8 +3,9 @@ use redis::RedisResult;
 use lazy_static::lazy_static;
 
 lazy_static!{
-    pub static ref REDIS_URI:String = std::env::var("REDIS_URI").expect("Must set REDIS_URI");
- }
+    pub static ref REDIS_HOST_NAME:String = std::env::var("REDIS_HOST_NAME").expect("Must set REDIS_HOST_NAME");
+    pub static ref REDIS_PRIMARY_PASSWORD:String = std::env::var("REDIS_PRIMARY_PASSWORD").expect("Must set REDIS_PRIMARY_PASSWORD");
+}
 
 #[derive(Debug, Clone)]
 pub(crate) struct Redis {
