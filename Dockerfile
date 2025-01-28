@@ -30,7 +30,7 @@ RUN apk add --no-cache libssl3 ca-certificates
 COPY --from=builder /usr/src/cookie-classifier/target/release/cookie-classifier /usr/local/bin/cookie-classifier
 
 # Expose the required port
-EXPOSE 8080
+EXPOSE 3000
 
 # Set the entrypoint to the application
 ENTRYPOINT [ "/usr/local/bin/cookie-classifier" ]

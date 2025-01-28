@@ -16,10 +16,10 @@ lazy_static = "1.5.0"
 mongodb = { version = "3.1", features = ["snappy-compression"] }
 axum = { version = "0.7.9"}
 tower-http = { version = "0.6.2", features = ["cors", "limit"] }
-axum-limit = "0.1.0-alpha.2"
-redis = { version = "0.28.2", features = ["tokio-comp"] }
 tower = { version = "0.5.2", features = ["full"] }
 pin-project = "1.1.8"
+redis = { version = "0.28.2", features = ["tokio-native-tls-comp","tokio-comp"] }
+tokio-native-tls = "0.3.1"
 
 [profile.dev]
 opt-level = 1  

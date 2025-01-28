@@ -24,7 +24,7 @@ lazy_static!{
     pub static ref TIME:u64 = std::env::var("TIME").expect("Must set TIME").parse::<u64>().expect("Parsing failed TIME");
 }
 
-async fn root(Extension(client): Extension<Arc<Client>>) -> Json<Value> {
+async fn root(Extension(client): Extension<Client>) -> Json<Value> {
     for db_name in client.list_database_names().await.unwrap() {
         println!("{}", db_name);
     }
@@ -37,7 +37,7 @@ async fn main() -> Result<(), Error> {
         Ok(client) => client,
         Err(e) => panic!("Failed to initialize database client: {}", e),
     };
-    let redis = redis::Client::open(format!("redis://:{}@{}",REDIS_PRIMARY_PASSWORD.as_str(),REDIS_HOST_NAME.as_str())).unwrap();
+    let redis = redis::Client::open(format!("rediss://:{}@{}",REDIS_PRIMARY_PASSWORD.as_str(),REDIS_HOST_NAME.as_str())).unwrap();
     let redis_connection = redis.get_multiplexed_async_connection().await.unwrap();
     let make_service = |key: &str, rate: u32, window: Duration| {
         let ratelimit = RateLimitLayer::new(
@@ -67,6 +67,7 @@ async fn main() -> Result<(), Error> {
         .layer(cors);
     let port: u16 = 3000;
     let bind_address = format!("0.0.0.0:{}", port);
+    println!("Started listening port {port}");
     let listener = tokio::net::TcpListener::bind(&bind_address).await.unwrap();
     axum::serve(listener, app).await?;
     Ok(())
