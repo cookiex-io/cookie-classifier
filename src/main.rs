@@ -1,15 +1,16 @@
 use std::{sync::Arc, time::Duration};
 use anyhow::Error;
-use api::handler::handle_cookie_classify_request;
-use axum::routing::{get, post};
+use axum::routing::get;
 use axum::{BoxError, Json, Router};
 use axum::{error_handling::HandleErrorLayer, Extension,http::StatusCode};
+use dto::{classify_open_routes, classify_routes};
 use infrastructure::cache::REDIS_URI;
 use mongodb::Client;
 use serde_json::{json, Value};
 use service::layer::RateLimitLayer;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
+use lazy_static::lazy_static;
 
 mod infrastructure;
 mod service;
@@ -17,6 +18,11 @@ mod model;
 mod utils;
 mod dto;
 mod api;
+
+lazy_static!{
+    pub static ref REQUESTS:u32 = std::env::var("REQUESTS").expect("Must set REQUESTS").parse::<u32>().expect("Parsing failed REQUESTS");
+    pub static ref TIME:u64 = std::env::var("TIME").expect("Must set TIME").parse::<u64>().expect("Parsing failed TIME");
+}
 
 async fn root(Extension(client): Extension<Arc<Client>>) -> Json<Value> {
     for db_name in client.list_database_names().await.unwrap() {
@@ -53,7 +59,8 @@ async fn main() -> Result<(), Error> {
         .allow_credentials(false);
     let app = Router::new()
         .route("/", get(root))
-        .route("/api/cookies/classify",post(handle_cookie_classify_request).layer(make_service("api/cookies/classify", 5, Duration::from_secs(60))))
+        .merge(classify_open_routes().layer(make_service("api/open/classify", *REQUESTS, Duration::from_secs(*TIME))))
+        .merge(classify_routes())
         .layer(Extension(client))
         .layer(Extension(open_cookies_cache))
         .layer(Extension(open_trackers_cache))

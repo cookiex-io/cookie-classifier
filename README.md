@@ -4,6 +4,7 @@
 This microservice provides an API for classifying cookies. It includes two main endpoints:
 1. **Open API with Rate Limiter:** Accessible with rate limiting to prevent abuse.
 2. **Authenticated API:** Provides unlimited access with proper authentication.
+2. **Global Cache** Using Redis cache the api can scale horizontally.
 
 ### Prerequisites
 - Rust and Cargo installed on your machine
