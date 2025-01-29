@@ -1,9 +1,9 @@
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 use anyhow::Error;
 use axum::routing::get;
 use axum::{BoxError, Json, Router};
 use axum::{error_handling::HandleErrorLayer, Extension,http::StatusCode};
-use dto::{classify_open_routes, classify_routes};
+use api::{classify_open_routes, classify_routes};
 use infrastructure::cache::{REDIS_HOST_NAME, REDIS_PRIMARY_PASSWORD};
 use mongodb::Client;
 use serde_json::{json, Value};
