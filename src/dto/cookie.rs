@@ -16,7 +16,7 @@ impl CookieRequest {
         if let Some(open_cookie) = open_cookies_cache.get(&self.filtered_name()){
             category = open_cookie.category.clone();
             description = Some(open_cookie.description.clone());
-          }else if let Some(open_tracker) = open_trackers_cache.get(&self.provider){
+          }else if let Some(open_tracker) = open_trackers_cache.get(&self.provider.replace("www.", "")){
             category = open_tracker.category.clone();
         }
       CookieResponse{name:self.name,provider:self.provider,category,description}
