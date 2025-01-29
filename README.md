@@ -4,7 +4,7 @@
 This microservice provides an API for classifying cookies. It includes two main endpoints:
 1. **Open API with Rate Limiter:** Accessible with rate limiting to prevent abuse.
 2. **Authenticated API:** Provides unlimited access with proper authentication.
-2. **Global Cache** Using Redis cache the api can scale horizontally.
+3. **Global Cache** Using Redis cache the api can scale horizontally.
 
 ### Prerequisites
 - Rust and Cargo installed on your machine
@@ -15,8 +15,8 @@ This microservice provides an API for classifying cookies. It includes two main 
 - **Method:** POST
 - **Request:**
   ```json
-  {
-    "domain": "www.google.com", // Optional
+   {
+    "domain": "www.google.com", //Optional
     "cookies": [
       {
         "name": "_ga",
@@ -25,26 +25,28 @@ This microservice provides an API for classifying cookies. It includes two main 
        {
         "name": "NID",
         "provider": "google.com"
+      },
+      {
+        "name":"COOKIE",
+        "provider":"unknown"
       }
     ]
   }
   ```
 - **Response:**
 ```json
- [
-  {
-    "name": "_ga",
+{
+  "_ga": {
     "provider": "google.com",
     "category": "Statistics",
     "description": "ID used to identify users"
   },
-  {
-    "name": "NID",
+  "NID": {
     "provider": "google.com",
     "category": "Marketing",
     "description": "This cookies is used to collect website statistics and track conversion rates and Google ad personalisation"
   }
-]
+}
 ```
 
 ### Build Docker image

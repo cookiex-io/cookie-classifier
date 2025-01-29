@@ -9,17 +9,16 @@ pub struct CookieRequest{
 }
 
 impl CookieRequest {
-    pub fn classify_via_cache(self,open_cookies_cache:&HashMap<String,OpenCookie>,open_trackers_cache:&HashMap<String,OpenTracker>) -> CookieResponse {
+    pub fn classify_via_cache(&self,open_cookies_cache:&HashMap<String,OpenCookie>,open_trackers_cache:&HashMap<String,OpenTracker>) -> CookieResponse {
         let mut category = CookieCategory::Unclassified;
         let mut description = None;
-
         if let Some(open_cookie) = open_cookies_cache.get(&self.filtered_name()){
             category = open_cookie.category.clone();
             description = Some(open_cookie.description.clone());
           }else if let Some(open_tracker) = open_trackers_cache.get(&self.provider.replace("www.", "")){
             category = open_tracker.category.clone();
         }
-      CookieResponse{name:self.name,provider:self.provider,category,description}
+      CookieResponse{provider:self.provider.clone(),category,description}
     }
 
     pub fn filtered_name(&self,) -> String {
@@ -35,7 +34,6 @@ impl CookieRequest {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CookieResponse{
-    pub name:String,
     pub provider:String,
     pub category:CookieCategory,
     #[serde(skip_serializing_if = "Option::is_none")]
