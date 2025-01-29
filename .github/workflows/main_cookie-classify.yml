@@ -22,7 +22,7 @@ jobs:
     - name: Log in to registry
       uses: docker/login-action@v2
       with:
-        registry: https://openapis.azurecr.io/
+        registry: https://stageing.azurecr.io/
         username: ${{ secrets.AzureAppService_ContainerUsername_7665f1786a45451faebca885b5826a50 }}
         password: ${{ secrets.AzureAppService_ContainerPassword_1f8abda3413849cf96935260816a0b6c }}
 
@@ -30,7 +30,7 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: openapis.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_7665f1786a45451faebca885b5826a50 }}/cookie-classifier:${{ github.sha }}
+        tags: stageing.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_7665f1786a45451faebca885b5826a50 }}/cookie-classifier:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -48,4 +48,4 @@ jobs:
         app-name: 'cookie-classify'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_a1bab84237db4e60bf75ace104136809 }}
-        images: 'openapis.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_7665f1786a45451faebca885b5826a50 }}/cookie-classifier:${{ github.sha }}'
+        images: 'stageing.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_7665f1786a45451faebca885b5826a50 }}/cookie-classifier:${{ github.sha }}'
