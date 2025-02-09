@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 use axum::{http::StatusCode, Extension, Json};
-use crate::{dto::cookie::{CookieResponse, CookiesClassificationRequest}, model::open_list::{CookieCategory, OpenCookie, OpenTracker}};
+use crate::{dto::cookie_dto::{CookieResponse, CookiesClassificationRequest}, model::open_list::{CookieCategory, OpenCookie, OpenTracker}};
 
 pub async fn handle_cookie_classify_request(
     Extension(open_cookies_cache):Extension<Arc<HashMap<String,OpenCookie>>>,

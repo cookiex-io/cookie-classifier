@@ -1,16 +1,20 @@
+use std::sync::Arc;
 use std::time::Duration;
 use anyhow::Error;
 use axum::routing::get;
 use axum::{BoxError, Json, Router};
 use axum::{error_handling::HandleErrorLayer, Extension,http::StatusCode};
 use api::{classify_open_routes, classify_routes};
+use dto::csv_dto::OpenTrackerCsvColumn;
 use infrastructure::cache::{REDIS_HOST_NAME, REDIS_PRIMARY_PASSWORD};
+use infrastructure::csv::get_list_from_csv;
 use mongodb::Client;
 use serde_json::{json, Value};
 use service::layer::RateLimitLayer;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
 use lazy_static::lazy_static;
+use reqwest::Client as ReqClient;
 
 mod infrastructure;
 mod service;
@@ -33,7 +37,8 @@ async fn root(Extension(client): Extension<Client>) -> Json<Value> {
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let (client,open_cookies_cache,open_trackers_cache) = match infrastructure::server::initialize_db_client_and_cache().await {
+    let req_client = Arc::new(ReqClient::new());
+    let (client,open_cookies_cache,open_trackers_cache) = match infrastructure::server::initialize_db_client_and_cache(&req_client).await {
         Ok(client) => client,
         Err(e) => panic!("Failed to initialize database client: {}", e),
     };
@@ -62,6 +67,7 @@ async fn main() -> Result<(), Error> {
         .merge(classify_open_routes().layer(make_service("api/open/classify", *REQUESTS, Duration::from_secs(*TIME))))
         .merge(classify_routes())
         .layer(Extension(client))
+        .layer(Extension(req_client))
         .layer(Extension(open_cookies_cache))
         .layer(Extension(open_trackers_cache))
         .layer(cors);

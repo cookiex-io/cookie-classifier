@@ -1,3 +1,4 @@
+pub mod csv;
 pub mod auth;
 pub mod server;
 pub mod cache;

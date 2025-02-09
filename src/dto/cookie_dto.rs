@@ -40,7 +40,6 @@ pub struct CookieResponse{
     pub description:Option<String>,
 }
 
-
 #[derive(Deserialize, Debug)]
 pub struct CookiesClassificationRequest{
     pub domain:Option<String>,

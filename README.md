@@ -33,6 +33,7 @@ This microservice provides an API for classifying cookies. It includes two main 
     ]
   }
   ```
+
 - **Response:**
 ```json
 {
