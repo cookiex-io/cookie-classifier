@@ -1,5 +1,5 @@
 # Build stage
-FROM rust:1.81-alpine AS builder
+FROM rust:1.88.0-alpine AS builder
 
 # Install dependencies for building Rust code
 RUN apk add --no-cache clang lld musl-dev perl openssl-libs-static pkgconf openssl-dev  make ca-certificates
