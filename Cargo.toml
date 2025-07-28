@@ -14,7 +14,6 @@ axum-extra = { version = "0.9", features = ["typed-header"] }
 anyhow = "1.0"
 lazy_static = "1.5.0"
 mongodb = { version = "3.1", features = ["snappy-compression"] }
-axum = { version = "0.7.9"}
 tower-http = { version = "0.6.2", features = ["cors", "limit"] }
 tower = { version = "0.5.2", features = ["full"] }
 pin-project = "1.1.8"
@@ -22,6 +21,7 @@ redis = { version = "0.28.2", features = ["tokio-native-tls-comp","tokio-comp"] 
 tokio-native-tls = "0.3.1"
 csv = "1.3.1"
 reqwest = "0.12.12"
+axum = "0.8.4"
 
 [profile.dev]
 opt-level = 1  
