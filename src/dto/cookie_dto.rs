@@ -1,11 +1,25 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
-use crate::model::open_list::{CookieCategory, OpenCookie, OpenTracker};
+use crate::{model::open_list::{CookieCategory, OpenCookie, OpenTracker}, service::classifier::COOKIE_CLASSIFICATION_PROMPT};
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CookiePromptResponse{
+    pub category:CookieCategory,
+    pub description:String,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CookieRequest{
     pub name:String,
     pub provider:String,
+}
+
+impl CookieRequest {
+    pub fn to_prompt(&self) -> String {
+      COOKIE_CLASSIFICATION_PROMPT
+       .replace("{name}", &self.name)
+       .replace("{provider}", &self.provider)
+    }
 }
 
 impl CookieRequest {

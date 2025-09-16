@@ -7,12 +7,14 @@ use axum::{error_handling::HandleErrorLayer, Extension,http::StatusCode};
 use api::{classify_open_routes, classify_routes};
 use infrastructure::cache::{REDIS_HOST_NAME, REDIS_PRIMARY_PASSWORD};
 use mongodb::Client;
+use rig::providers::openai;
 use serde_json::{json, Value};
 use service::layer::RateLimitLayer;
 use tower::ServiceBuilder;
 use tower_http::cors::{Any, CorsLayer};
 use lazy_static::lazy_static;
 use reqwest::Client as ReqClient;
+use rig::{agent::Agent, providers::openai::CompletionModel};
 
 mod infrastructure;
 mod service;
@@ -35,6 +37,9 @@ async fn root(Extension(client): Extension<Client>) -> Json<Value> {
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    let openai_client = openai::Client::from_env();
+    let openai_agent: Arc<Agent<CompletionModel>> = Arc::new(openai_client.agent("gpt-4.1").build());
+
     let req_client = Arc::new(ReqClient::new());
     let (client,open_cookies_cache,open_trackers_cache) = match infrastructure::server::initialize_db_client_and_cache(&req_client).await {
         Ok(client) => client,
@@ -68,6 +73,7 @@ async fn main() -> Result<(), Error> {
         .layer(Extension(req_client))
         .layer(Extension(open_cookies_cache))
         .layer(Extension(open_trackers_cache))
+        .layer(Extension(openai_agent))
         .layer(cors);
     let port: u16 = 3000;
     let bind_address = format!("0.0.0.0:{}", port);
