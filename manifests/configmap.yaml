@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cookie-classifier-k8s-config
+  namespace: default
+  labels:
+    app.kubernetes.io/name: cookie-classifier-k8s
+    kubernetes.azure.com/generator: devhub
+data:
+  MONGODB_URI: dummy
+  OPENAI_API_KEY: dummy
+  OPEN_COOKIES_CSV_URL: dummy
+  OPEN_TRACKERS_CSV_URL: dummy
+  REDIS_HOST_NAME: dummy
+  REDIS_PRIMARY_PASSWORD: dummy
+  REQUESTS: 5
+  TIME: 60
