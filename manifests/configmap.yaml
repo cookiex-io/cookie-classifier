@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cookie-classifier-k8s-config
-  namespace: default
-  labels:
-    app.kubernetes.io/name: cookie-classifier-k8s
-    kubernetes.azure.com/generator: devhub
-data:
