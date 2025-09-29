@@ -24,8 +24,8 @@ mod dto;
 mod api;
 
 lazy_static!{
-    pub static ref REQUESTS:u32 = std::env::var("REQUESTS").expect("Must set REQUESTS").parse::<u32>().expect("Parsing failed REQUESTS");
-    pub static ref TIME:u64 = std::env::var("TIME").expect("Must set TIME").parse::<u64>().expect("Parsing failed TIME");
+    pub static ref REQUESTS:u32 = std::env::var("REQUESTS").expect("Must set REQUESTS").parse::<u32>().unwrap_or(5);
+    pub static ref TIME:u64 = std::env::var("TIME").expect("Must set TIME").parse::<u64>().unwrap_or(60);
 }
 
 async fn root(Extension(client): Extension<Client>) -> Json<Value> {
