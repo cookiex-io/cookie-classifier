@@ -32,7 +32,7 @@ async fn root(Extension(client): Extension<Client>) -> Json<Value> {
     for db_name in client.list_database_names().await.unwrap() {
         println!("{}", db_name);
     }
-    Json(json!({ "status": "ok" }))
+    Json(json!({ "status": "okay" }))
 }
 
 #[tokio::main]
