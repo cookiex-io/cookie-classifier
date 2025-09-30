@@ -6,6 +6,7 @@ spec:
   provider: azure
   parameters:
     useVMManagedIdentity: "true"
+    userAssignedIdentityID: "edc614fb-4471-484d-8268-9a2dcce12eb4" 
     keyvaultName: "cookiex-open-key-vault"   # your Key Vault name
     tenantId: "5aba969e-efd8-451c-8e72-cbc6c9ff1353"                  # replace with Directory ID (tenant ID)
     objects: |
@@ -16,7 +17,8 @@ spec:
         - |
           objectName: redis-host-name
           objectType: secret
-        - |
+        - |                                                                                  
+        
           objectName: redis-primary-password
           objectType: secret
         - |
