@@ -1,91 +1,35 @@
-apiVersion: secrets-store.csi.x-k8s.io/v1
-kind: SecretProviderClass
-metadata:
-  name: azure-keyvault-envs
-spec:
-  provider: azure
-  parameters:
-    useVMManagedIdentity: "true"
-    userAssignedIdentityID: "edc614fb-4471-484d-8268-9a2dcce12eb4" 
-    keyvaultName: "cookiex-open-key-vault"   # your Key Vault name
-    tenantId: "5aba969e-efd8-451c-8e72-cbc6c9ff1353"                  # replace with Directory ID (tenant ID)
-    objects: |
-      array:
-        - |
-          objectName: mongodb-uri
-          objectType: secret
-        - |
-          objectName: redis-host-name
-          objectType: secret
-        - |                                                                                  
-        
-          objectName: redis-primary-password
-          objectType: secret
-        - |
-          objectName: classifier-secret
-          objectType: secret
-        - |
-          objectName: open-cookies-csv-url
-          objectType: secret
-        - |
-          objectName: open-trackers-csv-url
-          objectType: secret
-        - |
-          objectName: openai-api-key
-          objectType: secret
-  secretObjects:
-  - secretName: app-secrets
-    type: Opaque
-    data:
-    - objectName: mongodb-uri
-      key: MONGODB_URI
-    - objectName: redis-host-name
-      key: REDIS_HOST_NAME
-    - objectName: redis-primary-password
-      key: REDIS_PRIMARY_PASSWORD
-    - objectName: classifier-secret
-      key: CLASSIFIER_SECRET
-    - objectName: open-cookies-csv-url
-      key: OPEN_COOKIES_CSV_URL
-    - objectName: open-trackers-csv-url
-      key: OPEN_TRACKERS_CSV_URL
-    - objectName: openai-api-key
-      key: OPENAI_API_KEY
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cookie-classifier-k8s          # keep same as auto-generated to avoid conflicts
+  name: cookie-classifier-k8s
   namespace: default
-  labels:
-    app: cookie-classifier-k8s
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cookie-classifier-k8s       # must match pod template labels
+      app: cookie-classifier-k8s
   template:
     metadata:
       labels:
         app: cookie-classifier-k8s
+        app.kubernetes.io/name: cookie-classifier-k8s
     spec:
       containers:
       - name: cookie-classifier
         image: cookiexopen.azurecr.io/cookie-classifier:latest
-        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
         envFrom:
         - secretRef:
-            name: app-secrets          # populated from Key Vault
+            name: app-secrets
         env:
         - name: REQUESTS
           value: "5"
         - name: TIME
           value: "60"
-        ports:
-        - containerPort: 80
         volumeMounts:
         - name: secrets-store-inline
-          mountPath: "/mnt/secrets"
+          mountPath: /mnt/secrets
           readOnly: true
       volumes:
       - name: secrets-store-inline
@@ -93,4 +37,4 @@ spec:
           driver: secrets-store.csi.k8s.io
           readOnly: true
           volumeAttributes:
-            secretProviderClass: "azure-keyvault-envs"
+            secretProviderClass: azure-keyvault-envs
