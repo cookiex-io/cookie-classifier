@@ -1,93 +1,94 @@
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: azure-keyvault-envs
+spec:
+  provider: azure
+  parameters:
+    useVMManagedIdentity: "true"
+    keyvaultName: "cookiex-open-key-vault"   # your Key Vault name
+    tenantId: "5aba969e-efd8-451c-8e72-cbc6c9ff1353"                  # replace with Directory ID (tenant ID)
+    objects: |
+      array:
+        - |
+          objectName: mongodb-uri
+          objectType: secret
+        - |
+          objectName: redis-host-name
+          objectType: secret
+        - |
+          objectName: redis-primary-password
+          objectType: secret
+        - |
+          objectName: classifier-secret
+          objectType: secret
+        - |
+          objectName: open-cookies-csv-url
+          objectType: secret
+        - |
+          objectName: open-trackers-csv-url
+          objectType: secret
+        - |
+          objectName: openai-api-key
+          objectType: secret
+  secretObjects:
+  - secretName: app-secrets
+    type: Opaque
+    data:
+    - objectName: mongodb-uri
+      key: MONGODB_URI
+    - objectName: redis-host-name
+      key: REDIS_HOST_NAME
+    - objectName: redis-primary-password
+      key: REDIS_PRIMARY_PASSWORD
+    - objectName: classifier-secret
+      key: CLASSIFIER_SECRET
+    - objectName: open-cookies-csv-url
+      key: OPEN_COOKIES_CSV_URL
+    - objectName: open-trackers-csv-url
+      key: OPEN_TRACKERS_CSV_URL
+    - objectName: openai-api-key
+      key: OPENAI_API_KEY
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cookie-classifier-k8s
-  labels:
-    app.kubernetes.io/name: cookie-classifier-k8s
-    kubernetes.azure.com/generator: devhub
+  name: cookie-classifier-k8s          # keep same as auto-generated to avoid conflicts
   namespace: default
+  labels:
+    app: cookie-classifier-k8s
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: cookie-classifier-k8s
+      app: cookie-classifier-k8s       # must match pod template labels
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: cookie-classifier-k8s
+        app: cookie-classifier-k8s
     spec:
       containers:
-        - name: cookie-classifier-k8s
-          image: cookiexopen.azurecr.io/cookie-classifier:latest
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 3000
-          resources:
-            requests:
-              cpu: "0.5"
-              memory: "0.5Gi"
-            limits:
-              cpu: "1"
-              memory: "1Gi"
-          envFrom:
-            - configMapRef:
-                name: cookie-classifier-k8s-config
-            - secretRef:
-                name: secret-ref
-                optional: true
-          livenessProbe:
-            tcpSocket:
-              port: 3000
-          readinessProbe:
-            tcpSocket:
-              port: 3000
-            periodSeconds: 5
-            timeoutSeconds: 5
-            failureThreshold: 1
-            successThreshold: 1
-            initialDelaySeconds: 3
-          startupProbe:
-            tcpSocket:
-              port: 3000
-            periodSeconds: 10
-            timeoutSeconds: 1
-            failureThreshold: 3
-            successThreshold: 1
-            initialDelaySeconds: 0
-          securityContext:
-            seccompProfile:
-              type: RuntimeDefault
-            capabilities:
-              drop:
-                - ALL
-              add:
-                - SETPCAP
-                - MKNOD
-                - AUDIT_WRITE
-                - CHOWN
-                - DAC_OVERRIDE
-                - FOWNER
-                - FSETID
-                - KILL
-                - SETGID
-                - SETUID
-                - NET_BIND_SERVICE
-                - SYS_CHROOT
-                - SETFCAP
-                - SYS_PTRACE
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              topologyKey: kubernetes.io/hostname
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: cookie-classifier-k8s
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: cookie-classifier-k8s
+      - name: cookie-classifier
+        image: cookiexopen.azurecr.io/cookie-classifier:latest
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - secretRef:
+            name: app-secrets          # populated from Key Vault
+        env:
+        - name: REQUESTS
+          value: "5"
+        - name: TIME
+          value: "60"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: secrets-store-inline
+          mountPath: "/mnt/secrets"
+          readOnly: true
+      volumes:
+      - name: secrets-store-inline
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "azure-keyvault-envs"
